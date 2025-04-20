@@ -1,11 +1,14 @@
 package com.sirapopb.sirapopb_api.controllers;
 
+import com.sirapopb.sirapopb_api.dtos.UpdateUserRequest;
+import com.sirapopb.sirapopb_api.dtos.UpdateUserResponse;
 import com.sirapopb.sirapopb_api.entity.User;
 import com.sirapopb.sirapopb_api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,49 +32,42 @@ public class UserController {
         return data;
     }
 
-    @PostMapping("/create")
-    public User addUser(@RequestBody User user) {
-        user.setId(0);//ส่งแค่ชื่อนามสกุลไม่ส่ง id มันรัน auto
-        return _userService.save(user);
+    @PostMapping("/save")
+    public ResponseEntity<UpdateUserResponse>  addUser(@Valid @RequestBody UpdateUserRequest updateUserRequest) {
+        UpdateUserResponse savedUser = _userService.save(updateUserRequest);
+        return ResponseEntity.ok(savedUser); // Wrap the response correctlyP
     }
 
     @GetMapping("/getAll")
-    public List<User> getAll() {
+    public List<UpdateUserResponse> getAll() {
 
         return _userService.getAll();
     }
 
-    @GetMapping("/getUserById/{id}")
-    public User getUserById(@PathVariable Integer id) {
-        User result = _userService.getUserById(id);
+    @GetMapping("/getUserByTransId/{transId}")
+    public UpdateUserResponse getUserByTransId(@PathVariable Integer transId) {
+        UpdateUserResponse result = _userService.getUserByTransId(transId);
         if (result == null){
-            throw new RuntimeException("Not found" + id);
+            throw new RuntimeException("Not found" + transId);
         }
         return result;
     }
 
-    @DeleteMapping("/deleteById/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable Integer id) {
-        User result = _userService.getUserById(id);
-        if (result == null) {
-            throw new RuntimeException("Not found id " + id);
-        }
-        _userService.deleteById(id);
-        return ResponseEntity.ok("User with ID " + id + " deleted successfully.");
-
-    }
-
-    @PutMapping("/updateById/{id}")
-    public ResponseEntity<String> updateById(@PathVariable Integer id, @RequestBody User newUser) {
-        User existingUser = _userService.getUserById(id);
-
-        if (existingUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("User with ID" + id + "not found.");
-        }
-
-        _userService.updateById(id, newUser);
-        return ResponseEntity.ok("User with ID"+ id + "updated successfully.");
+//    @DeleteMapping("/deleteById/{id}")
+//    public ResponseEntity<String> deleteById(@PathVariable Integer id) {
+//        UpdateUserResponse result = _userService.getUserByTransId(id);
+//        if (result == null) {
+//            throw new RuntimeException("Not found id " + id);
+//        }
+//        _userService.deleteById(id);
+//        return ResponseEntity.ok("User with ID " + id + " deleted successfully.");
+//
+//    }
+//
+    @PutMapping("/updateByTransId/{transId}")
+    public ResponseEntity<String> updateByTransId(@PathVariable Integer transId, @RequestBody UpdateUserRequest updateUserRequest) {
+        _userService.updateByTransId(transId, updateUserRequest);
+        return ResponseEntity.ok("User with transId " + transId + " updated successfully.");
     }
 
     }

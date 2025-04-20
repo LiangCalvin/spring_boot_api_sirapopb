@@ -1,11 +1,11 @@
 package com.sirapopb.sirapopb_api.service;
 
+import com.sirapopb.sirapopb_api.dtos.UpdateUserRequest;
+import com.sirapopb.sirapopb_api.dtos.UpdateUserResponse;
 import com.sirapopb.sirapopb_api.entity.User;
 import com.sirapopb.sirapopb_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,44 +22,67 @@ public class UserService implements IUserService{
     }
 
     @Override //ifc
-    public User save(User user) {
-        return _userRepository.save(user);
+    public UpdateUserResponse save(UpdateUserRequest updateUserRequest) {
+        _userRepository.customSave(
+                updateUserRequest.getFirst_name(),
+                updateUserRequest.getLast_name(),
+                updateUserRequest.getTransId()
+        );
+        return new UpdateUserResponse(
+                updateUserRequest.getFirst_name(),
+                updateUserRequest.getLast_name(),
+                updateUserRequest.getTransId()
+        );
+    }
+
+//    @Override
+//    public UpdateUserResponse create(UpdateUserRequest updateUserRequest) {
+//        User user = new User(updateUserRequest);
+//        _userRepository.save(user);
+//        return new UpdateUserResponse(updateUserRequest);
+//    }
+
+
+    @Override
+    public List<UpdateUserResponse> getAll() {
+        return _userRepository.findAllUserResponses();
     }
 
     @Override
-    public List<User> getAll() {
-        return _userRepository.findAll();
-    }
-
-    @Override
-    public User getUserById(Integer id) {
-        Optional<User> result = _userRepository.findById(id);
+    public UpdateUserResponse getUserByTransId(Integer transId) {
+        Optional<User> result = _userRepository.findByTransId(transId);
         User data = null;
         if(result.isPresent()){
             data = result.get();
         } else {
-            throw new RuntimeException("Not found"+id);
+            throw new RuntimeException("Not found " + transId);
         }
-        return data;
-//        return _userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID " + id + " not found"));
 
+        UpdateUserResponse response = new UpdateUserResponse(
+                data.getFname(),
+                data.getLname(),
+                data.getTransId()
+        );
+        return response;
     }
 
+//    @Override
+//    public void deleteById(Integer id) {
+//
+//        _userRepository.deleteById(id);
+//    }
+
     @Override
-    public void deleteById(Integer id) {
+    public void updateByTransId(Integer transId, UpdateUserRequest updateUserRequest) {
+        User existingUser = _userRepository.findByTransId(transId)
+                .orElseThrow(() -> new RuntimeException("User with transId " + transId + " not found."));
 
-        _userRepository.deleteById(id);
-    }
+        // Update the user entity with the new values
+        existingUser.setFname(updateUserRequest.getFirst_name());
+        existingUser.setLname(updateUserRequest.getLast_name());
 
-    @Override
-    public void updateById(Integer id, User newUser) {
-        User existingUser = getUserById(id);
+        _userRepository.save(existingUser);
 
-        if (existingUser != null) {
-            existingUser.setFname(newUser.getFname());
-            existingUser.setLname(newUser.getLname());
-            _userRepository.save(existingUser);
-        }
     }
 
 

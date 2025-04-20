@@ -8,10 +8,15 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     @Column(name = "first_name")
     private String fname;
+
     @Column(name = "last_name")
     private String lname;
+
+    @Column(name = "trans_id")
+    private Integer transId;
 
     public User() {
 
@@ -23,6 +28,12 @@ public class User {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public User(String fname, String lname, Integer transId) {
+        this.fname = fname;
+        this.lname = lname;
+        this.transId = transId;
     }
 
     public User(String fname, String lname) {
@@ -45,4 +56,14 @@ public class User {
     public void setLname(String lname) {
         this.lname = lname;
     }
+
+    public Integer getTransId() {
+        return transId;
+    }
+
+    public void setTransId(Integer transId) {
+        this.transId = transId;
+    }
+
+
 }
